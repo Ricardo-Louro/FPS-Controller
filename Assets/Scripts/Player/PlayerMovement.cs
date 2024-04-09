@@ -99,7 +99,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         rb.velocity = moveDirection;
-        Debug.Log(rb.velocity.y);
     }
 
     public void SetGrounded(bool value)
