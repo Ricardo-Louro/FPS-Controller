@@ -6,11 +6,20 @@ public class Pistol : Weapon
     [SerializeField] private LayerMask      layerMask;
     public override int                     maxAmmo { get; protected set; } = 100;
     public override int                     currentAmmo { get; protected set; }
-    public override float                   shotCooldown { get; protected set; } = .5f;
+    public override float                   shotCooldown { get; protected set; } = 1f;
     public override float                   lastTimeShot { get; protected set; }
     public override int                     damage { get; protected set; } = 1;
     public override FiringType              firingType { get; protected set; } = FiringType.SemiAuto;
 
+    private ParticleSystem                  particleSystem;
+    private AudioSource                     audioSource;
+
+    private void Start()
+    {
+        base.Start();
+        particleSystem = GetComponentInChildren<ParticleSystem>();
+        audioSource = GetComponentInChildren<AudioSource>();
+    }
 
     public override void TryFire()
     {
@@ -34,8 +43,10 @@ public class Pistol : Weapon
     private void SuccessfulShot()
     {
         SubtractAmmo(1);
-        
-        //Play Animation
+
+        particleSystem.Play();
+        audioSource.pitch = Random.Range(.6f, 1f);
+        audioSource.Play();
         
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity, layerMask))
@@ -46,6 +57,8 @@ public class Pistol : Weapon
                 enemy.TakeDamage(damage);
             }
         }
+
+        lastTimeShot = Time.time;
     }
 
     private void NotEnoughAmmo()
