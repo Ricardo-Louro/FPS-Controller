@@ -3,27 +3,40 @@ using UnityEngine;
 
 public class Pistol : Weapon
 {
+    [Header("Raycast Ignore Collision")]
     [SerializeField] private LayerMask      layerMask;
-    public override int                     maxAmmo { get; protected set; } = 100;
+
+    [Header("Values")]
+    [SerializeField] private int MaxAmmo;
+    [SerializeField] private float ShotCooldown;
+
+    public override int                     maxAmmo { get; protected set; }
     public override int                     currentAmmo { get; protected set; }
-    public override float                   shotCooldown { get; protected set; } = 1f;
+    public override float                   shotCooldown { get; protected set; }
     public override float                   lastTimeShot { get; protected set; }
     public override int                     damage { get; protected set; } = 1;
     public override FiringType              firingType { get; protected set; } = FiringType.SemiAuto;
 
-    private ParticleSystem                  particleSystem;
-    private AudioSource                     audioSource;
+    private  new ParticleSystem             particleSystem;
 
-    private void Start()
+    [Header("Audio Sources")]    
+    [SerializeField] private AudioSource    noAmmo;
+    [SerializeField] private AudioSource    gunshotSound1;
+    [SerializeField] private AudioSource    gunshotSound2;
+
+    private new void Start()
     {
-        base.Start();
         particleSystem = GetComponentInChildren<ParticleSystem>();
-        audioSource = GetComponentInChildren<AudioSource>();
+
+        maxAmmo = MaxAmmo;
+        shotCooldown = ShotCooldown;
+
+        base.Start();
     }
 
     public override void TryFire()
     {
-        if(Time.time - lastTimeShot  >= shotCooldown && currentAmmo >= 1)
+        if(Time.time - lastTimeShot  >= shotCooldown)
         {
             if (currentAmmo >= 1)
             {
@@ -45,6 +58,24 @@ public class Pistol : Weapon
         SubtractAmmo(1);
 
         particleSystem.Play();
+
+        AudioSource audioSource;
+        if(gunshotSound1.isPlaying)
+        {
+            if (gunshotSound2.isPlaying)
+            {
+                audioSource = gunshotSound1;
+            }
+            else
+            {
+                audioSource= gunshotSound2;
+            }
+        }
+        else
+        {
+            audioSource = gunshotSound1;
+        }
+
         audioSource.pitch = Random.Range(.6f, 1f);
         audioSource.Play();
         
@@ -63,7 +94,11 @@ public class Pistol : Weapon
 
     private void NotEnoughAmmo()
     {
-        //PLAY THE SOUND
+        if (!noAmmo.isPlaying)
+        {
+            noAmmo.pitch = Random.Range(.8f, 1f);
+            noAmmo.Play();
+        }
     }
 
     private void NotInCooldown()
